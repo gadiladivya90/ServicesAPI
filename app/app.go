@@ -52,6 +52,7 @@ func Start() {
 	serviceHandler := ServiceHandler{service.NewServicePackageService(serviceRepositoryDb)}
 	serviceVersionsHandler := ServiceVersionHandler{service.NewServiceVersionService(serviceVersionRepositoryDb)}
 
+	//TODO: app conetxt.Conetxt across
 	router.HandleFunc("/services", serviceHandler.getAllServices).
 		Methods(http.MethodGet)
 	router.HandleFunc("/services/{service_id}", serviceHandler.getService).

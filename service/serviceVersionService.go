@@ -5,6 +5,7 @@ import (
 	"github.com/divyag/services/errs"
 )
 
+//go:generate mockgen -destination=../mocks/service/mockServicePackageService.go -package=service github.com/divyag/services/ServicePackageService
 type ServiceVersionService interface {
 	GetServiceVersionsByServiceID(string) ([]entity.ServiceVersionResponseDto, *errs.AppErr)
 	CreateServiceVersion(entity.ServiceVersionRequestDto) (entity.ServiceVersionResponseDto, *errs.AppErr)

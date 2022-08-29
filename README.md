@@ -25,7 +25,9 @@ More helpful commands can be found in Makefile:
 ### Implemented Endpoints
 
 $BASEURL : <http://localhost:9090>
+Some screenshots for below endpoints: <https://docs.google.com/document/d/1s4tuGvkTYOXS7QNahjdRIo3o1DIBnc-J_6PPxGycllE/edit>
 
+```shell
 GET $BASEURL/services
 GET $BASEURL/services/{service_id}
 POST $BASEURL/services
@@ -34,6 +36,7 @@ Delete $BASEURL//services/{service_id}
 GET $BASEURL//services/{service_id}/versions
 POST $BASEURL//services/{service_id}/versions
 DELETE $BASEURL//services/{service_id}/versions
+```
 
 ### Implementation details
 
@@ -77,9 +80,11 @@ Existing code can definitely use more debugging logs and inline comments
 ### Unit Test
 
 To run test `make tests`. This will take care of generating mocks and runnning tests
+TODO: add more tests for coverage
 
 ### Improvements/Pending implementation
 
+Pass context across RestAPI flow
 ServiceVersions and servicepackage coupling queries can be improved
-Add unit test coverage
 Add inline comments in code for readability
+Add Authentication and Authorization - JWT token Implementation

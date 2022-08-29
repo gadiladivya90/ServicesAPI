@@ -45,7 +45,7 @@ func (cdb ServiceVersionRepositoryDb) FindServiceVersionsByID(service_id string)
 func (cdb ServiceVersionRepositoryDb) SaveServiceVersion(s *entity.ServiceVersion) (*entity.ServiceVersion, *errs.AppErr) {
 
 	sqlInsert := fmt.Sprintf("INSERT INTO service_versions where (name, service_package_id ) values ('%s', '%s') RETURNING service_version_id", s.Name, s.ServiceId)
-
+	//todo:Update servicePackage versions column
 	var id string
 	err := cdb.client.QueryRow(sqlInsert).Scan(&id)
 	if err != nil {
