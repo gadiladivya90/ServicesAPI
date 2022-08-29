@@ -25,6 +25,7 @@ func NewServiceRepositoryDb(dbClient *sqlx.DB) ServiceRepositoryDb {
 func (cdb ServiceRepositoryDb) FindAll(filters entity.FilterParams) (*entity.PaginationResponseDto, *errs.AppErr) {
 	services := make([]entity.ServicePackage, 0)
 
+	//sql
 	filterQuery := getFilterSql(filters)
 	findAllSql := fmt.Sprintf("select * from service_packages %s", filterQuery)
 	err := cdb.client.Select(&services, findAllSql)
@@ -37,6 +38,7 @@ func (cdb ServiceRepositoryDb) FindAll(filters entity.FilterParams) (*entity.Pag
 		}
 	}
 
+	//getcount for pagination
 	findAllCountSql := fmt.Sprintf("select count(*) from service_packages %s", filterQuery)
 	row := cdb.client.QueryRow(findAllCountSql)
 	var total int

@@ -22,7 +22,7 @@ func setup(t *testing.T) func() {
 	mockService = service.NewMockServicePackageService(ctrl)
 	ch = ServiceHandlers{mockService}
 	router = mux.NewRouter()
-	router.HandleFunc("/customers", ch.getAllCustomers)
+	router.HandleFunc("/services", ch.getAllServicces)
 	return func() {
 		router = nil
 		defer ctrl.Finish()
@@ -39,7 +39,7 @@ func Test_should_return_services_with_status_code_200(t *testing.T) {
 		{"bc1bc81b-dead-4e5d-abff-90865d1e13b1", "s2", "s2d2", "2020-2-20 13:10:53.163", "2020-12-30 13:10:53.163", []string{}},
 	}
 	mockService.EXPECT().getAllServices("").Return(dummyServices, nil)
-	request, _ := http.NewRequest(http.MethodGet, "/customers", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services", nil)
 
 	// Act
 	recorder := httptest.NewRecorder()
@@ -56,7 +56,7 @@ func Test_should_return_status_code_500_with_error_message(t *testing.T) {
 	teardown := setup(t)
 	defer teardown()
 	mockService.EXPECT().GetAllServices("").Return(nil, errs.InternalServerError("some database error"))
-	request, _ := http.NewRequest(http.MethodGet, "/customers", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services", nil)
 
 	// Act
 	recorder := httptest.NewRecorder()

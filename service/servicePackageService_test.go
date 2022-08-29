@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ashishjuyal/banking-lib/errs"
 	"github.com/divyag/services/entity"
+	"github.com/divyag/services/errs"
 	"github.com/golang/mock/gomock"
 )
 
@@ -20,7 +20,7 @@ func Test_should_return_error_response_when_the_request_is_not_validated(t *test
 	_, appError := service.NewServicePackageService(request)
 	// Assert
 	if appError == nil {
-		t.Error("failed while testing the new account validation")
+		t.Error("failed while testing the new servicepackage request validation")
 	}
 }
 
@@ -29,7 +29,7 @@ var service ServicePackageService
 
 func setup(t *testing.T) func() {
 	ctrl := gomock.NewController(t)
-	mockRepo = entity.NewMockAccountRepository(ctrl)
+	mockRepo = entity.NewMockServicePackageService(ctrl)
 	service = NewServicePackageService(mockRepo)
 	return func() {
 		service = nil
@@ -53,7 +53,7 @@ func Test_should_return_an_error_if_the_new_service_cannot_be_created(t *testing
 		UpdatedAt:   time.Now().Format(time.RFC3339),
 		Versions:    []string{},
 	}
-	mockRepo.EXPECT().SaveService(req).Return(nil, errs.NewUnexpectedError("Name cannot be empty and should only contain alphanumber!"))
+	mockRepo.EXPECT().SaveService(req).Return(nil, errs.InternalServerErrorxw("Name cannot be empty and should only contain alphanumber!"))
 
 	// Assert
 	if appError == nil {
@@ -62,7 +62,7 @@ func Test_should_return_an_error_if_the_new_service_cannot_be_created(t *testing
 
 }
 
-func Test_should_return_new_account_response_when_a_new_account_is_saved_successfully(t *testing.T) {
+func Test_should_return_new_service_response_when_a_new_service_is_saved_successfully(t *testing.T) {
 	// Arrange
 	teardown := setup(t)
 	defer teardown()
@@ -83,7 +83,7 @@ func Test_should_return_new_account_response_when_a_new_account_is_saved_success
 
 	// Assert
 	if appError != nil {
-		t.Error("Test failed while creating new account")
+		t.Error("Test failed while creating new service")
 	}
 
 }
