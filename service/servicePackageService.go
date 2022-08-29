@@ -1,24 +1,25 @@
 package service
 
 import (
-	"github.com/divyag/services/dto"
+	"fmt"
+
+	"github.com/divyag/services/entity"
 	"github.com/divyag/services/errs"
-	"github.com/divyag/services/schema"
 )
 
 type ServicePackageService interface {
-	GetAllServices(dto.FilterParams) (*dto.PaginationResponseDto, *errs.AppErr)
-	GetServiceByID(string) (dto.ServiceResponseDto, *errs.AppErr)
-	CreateService(dto.ServiceRequestDto) (dto.ServiceResponseDto, *errs.AppErr)
-	UpdateService(string, dto.ServiceRequestDto) (dto.ServiceResponseDto, *errs.AppErr)
+	GetAllServices(entity.FilterParams) (*entity.PaginationResponseDto, *errs.AppErr)
+	GetServiceByID(string) (entity.ServiceResponseDto, *errs.AppErr)
+	CreateService(entity.ServiceRequestDto) (entity.ServiceResponseDto, *errs.AppErr)
+	UpdateService(*entity.ServicePackage) (entity.ServiceResponseDto, *errs.AppErr)
 	DeleteService(string) *errs.AppErr
 }
 
 type DefaultServicePackageService struct {
-	repo schema.ServiceRepositoryDb
+	repo ServiceRepositoryDb
 }
 
-func (s DefaultServicePackageService) GetAllServices(filters dto.FilterParams) (*dto.PaginationResponseDto, *errs.AppErr) {
+func (s DefaultServicePackageService) GetAllServices(filters entity.FilterParams) (*entity.PaginationResponseDto, *errs.AppErr) {
 	r, err := s.repo.FindAll(filters)
 	if err != nil {
 		return nil, err
@@ -27,41 +28,36 @@ func (s DefaultServicePackageService) GetAllServices(filters dto.FilterParams) (
 
 }
 
-func (s DefaultServicePackageService) GetServiceByID(id string) (dto.ServiceResponseDto, *errs.AppErr) {
+func (s DefaultServicePackageService) GetServiceByID(id string) (entity.ServiceResponseDto, *errs.AppErr) {
 	service, err := s.repo.FindServiceByID(id)
 	if err != nil {
-		return dto.ServiceResponseDto{}, err
+		return entity.ServiceResponseDto{}, err
 	}
 
 	return service.ToDto(), nil
 }
 
-func (s DefaultServicePackageService) CreateService(d dto.ServiceRequestDto) (dto.ServiceResponseDto, *errs.AppErr) {
-	err := dto.ServiceRequestDto.Validate(d)
+func (s DefaultServicePackageService) CreateService(d entity.ServiceRequestDto) (entity.ServiceResponseDto, *errs.AppErr) {
+	fmt.Println(d)
+	err := entity.ServiceRequestDto.Validate(d)
 	if err != nil {
-		return dto.ServiceResponseDto{}, err
+		return entity.ServiceResponseDto{}, err
 	}
 
-	service := schema.NewServicePackage(d)
+	service := entity.NewServicePackage(d)
 	newService, err := s.repo.SaveService(service)
 	if err != nil {
-		return dto.ServiceResponseDto{}, err
+		return entity.ServiceResponseDto{}, err
 	}
 
 	return newService.ToDto(), nil
 }
 
-func (s DefaultServicePackageService) UpdateService(id string, d dto.ServiceRequestDto) (dto.ServiceResponseDto, *errs.AppErr) {
-	err := dto.ServiceRequestDto.Validate(d)
-	if err != nil {
-		return dto.ServiceResponseDto{}, err
-	}
+func (s DefaultServicePackageService) UpdateService(service *entity.ServicePackage) (entity.ServiceResponseDto, *errs.AppErr) {
 
-	service := schema.NewServicePackage(d)
-	service.Id = id
-	udpatedService, err := s.repo.UpdateService(id, service)
+	udpatedService, err := s.repo.UpdateService(service)
 	if err != nil {
-		return dto.ServiceResponseDto{}, err
+		return entity.ServiceResponseDto{}, err
 	}
 
 	return udpatedService.ToDto(), nil
@@ -77,6 +73,6 @@ func (s DefaultServicePackageService) DeleteService(id string) *errs.AppErr {
 	return nil
 }
 
-func NewServicePackageService(repo schema.ServiceRepositoryDb) DefaultServicePackageService {
+func NewServicePackageService(repo ServiceRepositoryDb) DefaultServicePackageService {
 	return DefaultServicePackageService{repo: repo}
 }

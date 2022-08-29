@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/divyag/services/dto"
+	"github.com/divyag/services/entity"
 	"github.com/divyag/services/logger"
 	"github.com/divyag/services/service"
 
@@ -17,107 +17,126 @@ type ServiceHandler struct {
 	service service.ServicePackageService
 }
 
-func (sh *ServiceHandler) greet(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprint(w, "Hello World!")
-}
-
+/*
+getAllServices retrieves List of Services and statusCode
+Handle Bad request errors or UnExpectedErrors and write to response
+*/
 func (sh *ServiceHandler) getAllServices(w http.ResponseWriter, r *http.Request) {
 	fitlerParams, err := getFilterParams(r)
 	if err != nil {
-		writeResponse(w, http.StatusBadRequest, err.Error())
+		logger.Error(fmt.Sprintf("Error during Parsing filter params err: %+v\n", err.Error()))
+		WriteResponse(w, http.StatusBadRequest, err.Error())
 	}
 
 	services, appErr := sh.service.GetAllServices(fitlerParams)
 	if appErr != nil {
-		writeResponse(w, appErr.Code, appErr.GetMessage())
+		WriteResponse(w, appErr.Code, appErr.GetMessage())
 	} else {
-		writeResponse(w, http.StatusOK, services)
+		WriteResponse(w, http.StatusOK, services)
 	}
 }
 
+/*
+getService retrieves Services of given service_id
+Handle errors and write result to response
+*/
 func (sh *ServiceHandler) getService(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	service, err := sh.service.GetServiceByID(vars["service_id"])
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
+		WriteResponse(w, err.Code, err.GetMessage())
 	} else {
-		writeResponse(w, http.StatusOK, service)
+		WriteResponse(w, http.StatusOK, service)
 	}
 }
 
+/*
+createService handles retrieving payload,
+Handle errors during creation of service
+*/
 func (sh *ServiceHandler) createService(w http.ResponseWriter, r *http.Request) {
-	var request dto.ServiceRequestDto
+	var request entity.ServiceRequestDto
+	//get the request payload
 	decodeErr := json.NewDecoder(r.Body).Decode(&request)
 	if decodeErr != nil {
-		writeResponse(w, http.StatusBadRequest, nil)
+		WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
+	//
 	c, err := sh.service.CreateService(request)
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
+		WriteResponse(w, err.Code, err.GetMessage())
 	} else {
-		writeResponse(w, http.StatusCreated, c)
+		WriteResponse(w, http.StatusCreated, c)
 	}
 }
 
+/*
+updateService handles retrieving payload,
+Handle errors during updating service
+*/
 func (sh *ServiceHandler) updateService(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	_, err := sh.service.GetServiceByID(vars["service_id"])
+	existingService, err := sh.service.GetServiceByID(vars["service_id"])
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
+		WriteResponse(w, err.Code, err.GetMessage())
 		return
 	}
 
-	var request dto.ServiceRequestDto
+	var request entity.ServiceRequestDto
 	decodeErr := json.NewDecoder(r.Body).Decode(&request)
 	if decodeErr != nil {
-		writeResponse(w, http.StatusBadRequest, nil)
+		WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
-	c, err := sh.service.UpdateService(vars["service_id"], request)
+	err = entity.ServiceRequestDto.Validate(request)
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
-	} else {
-		writeResponse(w, http.StatusAccepted, c)
+		WriteResponse(w, http.StatusBadRequest, nil)
+		return
 	}
 
+	// create ServicePackge and updating Id and createdAt from existingService details
+	service := entity.NewServicePackage(request)
+	service.Id = existingService.Id
+	service.CreatedAt = existingService.CreatedAt
+
+	c, err := sh.service.UpdateService(service)
+	if err != nil {
+		WriteResponse(w, err.Code, err.GetMessage())
+	} else {
+		WriteResponse(w, http.StatusAccepted, c)
+	}
 }
 
+/*
+deleteService deletes service of a given service_id
+*/
 func (sh *ServiceHandler) deleteService(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
+	//verify if the service exists
 	_, err := sh.service.GetServiceByID(vars["service_id"])
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
+		WriteResponse(w, err.Code, err.GetMessage())
 	}
 
+	// delete service
 	err = sh.service.DeleteService(vars["service_id"])
 	if err != nil {
-		writeResponse(w, err.Code, err.GetMessage())
+		WriteResponse(w, err.Code, err.GetMessage())
 	} else {
-		writeResponse(w, http.StatusNoContent, nil)
+		WriteResponse(w, http.StatusNoContent, nil)
 	}
 
 }
 
-func writeResponse(w http.ResponseWriter, code int, data interface{}) {
-	w.WriteHeader(code)
-
-	if code != http.StatusNoContent {
-		w.Header().Add("Content-Type", "applciation/json")
-		if err := json.NewEncoder(w).Encode(data); err != nil {
-			logger.Error("Unable to Write Data to response!")
-		}
-	}
-}
-
-func getFilterParams(r *http.Request) (dto.FilterParams, error) {
+func getFilterParams(r *http.Request) (entity.FilterParams, error) {
 	var err error
-	var filters dto.FilterParams
+	var filters entity.FilterParams
 	if r.URL.Query().Has("filter") {
 		filters.Filter = r.URL.Query().Get("filter")
 	}

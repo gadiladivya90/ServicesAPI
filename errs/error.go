@@ -26,3 +26,17 @@ func InternalServerError(message string) *AppErr {
 		Code:    http.StatusInternalServerError,
 	}
 }
+
+func UnExpectedError(message string) *AppErr {
+	return &AppErr{
+		Message: message,
+		Code:    http.StatusInternalServerError,
+	}
+}
+
+func BadRequestError(message string) *AppErr {
+	return &AppErr{
+		Message: message,
+		Code:    http.StatusInternalServerError,
+	}
+}
