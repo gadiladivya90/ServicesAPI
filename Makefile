@@ -67,3 +67,13 @@ build-binary: build-clean
 build-generate: 
 	@SWAGGER_GENERATE_EXTENSION=false go generate ./...
 
+.PHONY:tests
+tests: generate-mocks run-tests
+	
+.PHONY:run-tests
+run-tests:
+	@./run_tests.sh
+
+.PHONY:genrate-mocks
+run-tests:
+	@./generate_mocks.sh	

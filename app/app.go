@@ -17,17 +17,21 @@ import (
 
 // Sanity check before starting application
 func envCheck() {
-	if os.Getenv("DB_HOST") == "" ||
-		os.Getenv("DB_PORT") == "" ||
-		os.Getenv("DB_USERNAME") == "" ||
-		os.Getenv("DB_PASSWORD") == "" ||
-		os.Getenv("DB_NAME") == "" {
-		log.Fatal("Database env variables missing!")
+
+	envVariables := []string{
+		"DB_HOST",
+		"DB_PORT",
+		"DB_USERNAME",
+		"DB_PASSWORD",
+		"DB_NAME",
+		"SERVER_ADDRESS",
+		"SERVER_PORT",
 	}
 
-	if os.Getenv("SERVER_ADDRESS") == "" || os.Getenv("SERVER_PORT") == "" {
-		log.Fatal("Application server env variables missing!")
-
+	for _, v := range envVariables {
+		if os.Getenv(v) == "" {
+			log.Fatalf("Application cannot be initiated, env variable %s missing!", v)
+		}
 	}
 }
 

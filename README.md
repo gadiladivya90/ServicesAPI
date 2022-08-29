@@ -76,6 +76,8 @@ Existing code can definitely use more debugging logs and inline comments
 
 ### Unit Test
 
+To run test `make tests`. This will take care of generating mocks and runnning tests
+
 ### Improvements/Pending implementation
 
 ServiceVersions and servicepackage coupling queries can be improved

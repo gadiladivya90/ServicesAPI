@@ -8,7 +8,10 @@ require (
 	go.uber.org/zap v1.23.0
 )
 
+require github.com/DATA-DOG/go-sqlmock v1.5.0
+
 require (
+	github.com/golang/mock v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
